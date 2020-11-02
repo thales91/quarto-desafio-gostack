@@ -8,11 +8,9 @@ interface Balance {
 
 class TransactionsRepository {
   private transactions: Transaction[];
-  private balance: Balance;
 
   constructor() {
     this.transactions = [];
-    this.balance = {income:0,outcome:0,total:0}
   }
 
   public all(): Transaction[] {
@@ -20,19 +18,25 @@ class TransactionsRepository {
   }
 
   public getBalance(): Balance {
-    return this.balance;
+    const { income, outcome, } = this.transactions.reduce((previous, current) => {
+      if (current.type == "income") {
+        previous.income += current.value
+      } else {
+        previous.outcome += current.value
+      }
+      return previous
+    }, {
+      income: 0,
+      outcome: 0,
+
+    });
+    const balance = { income, outcome, total: income - outcome }
+    return balance
   }
 
   public create(transaction: Transaction): Transaction {
     this.transactions.push(transaction)
-    if (transaction.type == "income")
-    {
-      this.balance.income = this.balance.income +  transaction.value
-    }
-    else{
-      this.balance.outcome = this.balance.outcome + transaction.value
-    }
-    this.balance.total = this.balance.income - this.balance.outcome
+
     return transaction
   }
 }
